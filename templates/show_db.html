@@ -1,0 +1,198 @@
+{% from "bootstrap5/form.html" import render_form %}
+{% include "header.html" %}
+
+<!-- Page Header-->
+<header
+  class="masthead"
+  style="background-image: url('../static/assets/img/MD.png')"
+>
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="page-heading">
+          <span class="subheading"></span>
+          <h1>All Assets</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+<!-- Main Content-->
+<div class="container px-4 px-lg-5">
+  <div class="row gx-4 gx-lg-5 justify-content-start">
+    <div class="col-md-10 col-lg-8 col-xl-7">
+      <h2 class="mb-4">All Assets on DB</h2>
+
+      <!-- Filter Inputs -->
+      <div class="mb-3">
+        {% for header in table_headers %}
+          {% if header != 'Owner' and header != 'Returned' %}
+            <input type="text" id="filter{{ header }}" placeholder="Filter by {{ header }}..">
+          {% endif %}
+        {% endfor %}
+        <input type="text" id="filterOwner" placeholder="Filter by Owner..">
+        <input type="text" id="filterReturned" placeholder="Filter by Returned..">
+        <button class="btn btn-primary" onclick="applyFilters()">Search</button>
+      </div>
+
+      <!-- Table -->
+      <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th onclick="sortTable(0)"> DB ID</th>
+            <th onclick="sortTable(2)">Cover Tag</th>
+            <th onclick="sortTable(3)">Asset ID</th>
+            <th onclick="sortTable(4)">Serial Number</th>
+            <th onclick="sortTable(1)">Location</th>
+            <th onclick="sortTable(5)">UDID</th>
+            <th onclick="sortTable(6)">Technician</th>
+            <th onclick="sortTable(7)">Time</th>
+            <th onclick="sortTable(8)">Owner</th>
+            <th onclick="sortTable(9)">Returned</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          {% for asset in all_assets %}
+            <tr>
+              <td>{{ asset.id }}</td>
+              <td>{{ asset.cover_tag }}</td>
+              <td>{{ asset.asset_id }}</td>
+              <td>{{ asset.serial_number }}</td>
+              <td>{{ asset.location }}</td>
+              <td>{{ asset.udid }}</td>
+              <td>{{ asset.technician }}</td>
+              <td>{{ asset.time_scanned }}</td>
+              <td>{{ asset.owner }}</td>
+              <td>{{ asset.returned }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Table Filtering and Sorting -->
+<script>
+  function applyFilters() {
+    var tableHeaders = {{ table_headers|tojson }};
+    var filterValues = {};
+
+    // Get filter values for each input field
+    tableHeaders.forEach(function(header) {
+      var filterInput = document.getElementById("filter" + header);
+      filterValues[header] = filterInput ? filterInput.value.toUpperCase() : "";
+    });
+
+    filterValues['Owner'] = document.getElementById("filterOwner").value.toUpperCase();
+    filterValues['Returned'] = document.getElementById("filterReturned").value.toUpperCase();
+
+    var table = document.getElementById("tableBody");
+    var rows = table.getElementsByTagName("tr");
+
+    for (var i = 0; i < rows.length; i++) {
+      var cells = rows[i].getElementsByTagName("td");
+      var showRow = true;
+
+      if (cells.length > 0) {
+        for (var j = 0; j < cells.length; j++) {
+          var cellValue = cells[j].textContent.toUpperCase();
+          var columnHeader = tableHeaders[j];
+          var filterValue = filterValues[columnHeader];
+
+          // Split filterValue by space to support partial matching for multiple words
+          var filterWords = filterValue.split(" ");
+          var cellContainsFilter = true;
+
+          filterWords.forEach(function(word) {
+            if (word.trim() !== "" && cellValue.indexOf(word.trim()) === -1) {
+              cellContainsFilter = false;
+            }
+          });
+
+          if (!cellContainsFilter) {
+            showRow = false;
+            break; // No need to continue checking other cells if one doesn't match
+          }
+        }
+
+        rows[i].style.display = showRow ? "" : "none";
+      }
+    }
+  }
+
+  function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.querySelector("table");
+    switching = true;
+    // Set the sorting direction to ascending:
+    dir = "asc";
+    /* Make a loop that will continue until
+    no switching has been done: */
+    while (switching) {
+      // Start by saying: no switching is done:
+      switching = false;
+      rows = table.rows;
+      /* Loop through all table rows (except the
+      first, which contains table headers): */
+      for (i = 1; i < (rows.length - 1); i++) {
+        // Start by saying there should be no switching:
+        shouldSwitch = false;
+        /* Get the two elements you want to compare,
+        one from current row and one from the next: */
+        x = rows[i].getElementsByTagName("td")[n];
+        y = rows[i + 1].getElementsByTagName("td")[n];
+        /* Check if the two rows should switch place,
+        based on the direction, asc or desc: */
+        if (dir == "asc") {
+          if (isNumber(x.innerHTML) && isNumber(y.innerHTML)) {
+            if (parseInt(x.innerHTML) > parseInt(y.innerHTML)) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true;
+              break;
+            }
+          } else {
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true;
+              break;
+            }
+          }
+        } else if (dir == "desc") {
+          if (isNumber(x.innerHTML) && isNumber(y.innerHTML)) {
+            if (parseInt(x.innerHTML) < parseInt(y.innerHTML)) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true;
+              break;
+            }
+          } else {
+            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true;
+              break;
+            }
+          }
+        }
+      }
+      if (shouldSwitch) {
+        /* If a switch has been marked, make the switch
+        and mark that a switch has been done: */
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        // Each time a switch is done, increase switchcount by 1:
+        switchcount++;
+      } else {
+        /* If no switching has been done AND the direction is "asc",
+        set the direction to "desc" and run the while loop again. */
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+  }
+
+  function isNumber(value) {
+    return !isNaN(parseFloat(value)) && isFinite(value);
+  }
+</script>

@@ -1,0 +1,106 @@
+{% from "bootstrap5/form.html" import render_form %}
+{% include "header.html" %}
+
+<!-- Page Header-->
+<header
+  class="masthead"
+  style="background-image: url('../static/assets/img/MD.png')"
+>
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="page-heading">
+          <h1>
+
+Scanned Assets
+          </h1>
+          <span class="subheading"
+            ></span
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+<!-- Main Content-->
+<div class="container px-4 px-lg-5">
+  <div class="row gx-4 gx-lg-5 justify-content-center">
+    <div class="col-md-10 col-lg-8 col-xl-7">
+      <h2 class="mb-4">All Scanned Assets</h2>
+      {{render_form(form, novalidate=True, button_map={"submit": "primary"})}}
+<hr>
+      <!-- Filter Inputs -->
+      <div class="mb-3">
+        <input type="text" id="filterCoverTag" placeholder="Filter by Cover Tag..">
+        <input type="text" id="filterAssetTag" placeholder="Filter by Asset Tag..">
+        <input type="text" id="filterSerialNumber" placeholder="Filter by Serial Number..">
+        <input type="text" id="filterLocation" placeholder="Filter by Location..">
+        <button class="btn btn-primary" onclick="applyFilters()">Search</button>
+      </div>
+
+      <!-- Table -->
+      <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th>Cover Tag</th>
+            <th>Asset Tag</th>
+            <th>Serial Number</th>
+            <th>Location</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          {% for asset in all_assets %}
+          <tr>
+            {% if asset.cover_tag != None %}
+            <td>{{ asset.cover_tag }}</td>
+            <td>{{ asset.asset_id }}</td>
+            <td>{{ asset.serial_number }}</td>
+            <td>{{ asset.location }}</td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Table Filtering -->
+<script>
+  function applyFilters() {
+    var filterCoverTag = document.getElementById("filterCoverTag").value.toUpperCase();
+    var filterAssetTag = document.getElementById("filterAssetTag").value.toUpperCase();
+    var filterSerialNumber = document.getElementById("filterSerialNumber").value.toUpperCase();
+    var filterLocation = document.getElementById("filterLocation").value.toUpperCase();
+
+    var table = document.getElementById("tableBody");
+    var rows = table.getElementsByTagName("tr");
+
+    for (var i = 0; i < rows.length; i++) {
+      var cells = rows[i].getElementsByTagName("td");
+      var showRow = true;
+
+      if (cells.length > 0) {
+        var cellCoverTag = cells[0].textContent.toUpperCase();
+        var cellAssetTag = cells[1].textContent.toUpperCase();
+        var cellSerialNumber = cells[2].textContent.toUpperCase();
+        var cellLocation = cells[3].textContent.toUpperCase();
+
+        if (filterCoverTag && cellCoverTag.indexOf(filterCoverTag) === -1) {
+          showRow = false;
+        }
+        if (filterAssetTag && cellAssetTag.indexOf(filterAssetTag) === -1) {
+          showRow = false;
+        }
+        if (filterSerialNumber && cellSerialNumber.indexOf(filterSerialNumber) === -1) {
+          showRow = false;
+        }
+        if (filterLocation && cellLocation.indexOf(filterLocation) === -1) {
+          showRow = false;
+        }
+
+        rows[i].style.display = showRow ? "" : "none";
+      }
+    }
+  }
+</script>
