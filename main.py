@@ -201,7 +201,11 @@ def assign_asset():
         }
         # for all the device ranges , assign the cover number to a user
         # takes cover tag, with that info, takes serial number and created a csv file for that location
-        for i in range(int(form.start_number.data), int(form.end_number.data) + 1):
+        # for i in range(int(form.start_number.data), int(form.end_number.data) + 1):
+        while True:
+            i = form.cover_tag.data
+            if i == "finish":
+                break
             result = db.session.execute(db.select(ModDem).where(ModDem.cover_tag == i))
             asset = result.scalar()
             asset.location = form.location.data
@@ -370,6 +374,23 @@ def returned():
         except:
             flash("Asset not found!!!")
     return render_template("return.html", form=form)
+
+
+@app.route("/edit/<int:asset_id>", methods=["GET", "POST"])
+def edit(asset_id):
+    asset = db.get_or_404(ModDem, asset_id)
+    edit_form = ScanForm(
+        asset_id=asset.asset_id,
+        cover_tag=asset.cover_tag
+    )
+    if edit_form.validate_on_submit():
+        asset.asset_id = edit_form.asset_id.data
+        asset.cover_tag = edit_form.cover_tag.data
+        db.session.commit()
+        return redirect(url_for("get_all_assets", asset_id=asset.id))
+    return render_template("edit.html", form=edit_form, is_edit=True, current_user=current_user)
+
+
 
 
 if __name__ == "__main__":

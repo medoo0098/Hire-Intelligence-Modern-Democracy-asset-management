@@ -7953,7 +7953,7 @@ textarea.form-control-lg {
   pointer-events: none !important;
 }
 
-.cursor-pointer {
+.pe-auto {
   pointer-events: auto !important;
 }
 

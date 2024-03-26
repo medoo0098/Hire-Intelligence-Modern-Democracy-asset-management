@@ -28,8 +28,8 @@ class ScanForm(FlaskForm):
 # Create a form that assigns iPads to locations
 class AssignForm(FlaskForm):
     location = StringField("Enter Location Email", validators=[DataRequired()])
-    start_number = IntegerField("Enter First iPad Cover tag in the bunch ", validators=[DataRequired()])
-    end_number = IntegerField("Enter last iPad Cover tag in the bunch ", validators=[DataRequired()])
+    cover_tag = IntegerField("Scan cover Tag ", validators=[DataRequired()])
+    # end_number = IntegerField("Enter last iPad Cover tag in the bunch ", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
 

@@ -1,5 +1,4 @@
-{% from "bootstrap5/form.html" import render_form %}
-{% include "header.html" %}
+{% from "bootstrap5/form.html" import render_form %} {% include "header.html" %}
 
 <!-- Page Header-->
 <header
@@ -10,13 +9,8 @@
     <div class="row gx-4 gx-lg-5 justify-content-center">
       <div class="col-md-10 col-lg-8 col-xl-7">
         <div class="page-heading">
-          <h1>
-
-Scanned Assets
-          </h1>
-          <span class="subheading"
-            ></span
-          >
+          <h1>Scanned Assets</h1>
+          <span class="subheading"></span>
         </div>
       </div>
     </div>
@@ -28,13 +22,29 @@ Scanned Assets
     <div class="col-md-10 col-lg-8 col-xl-7">
       <h2 class="mb-4">All Scanned Assets</h2>
       {{render_form(form, novalidate=True, button_map={"submit": "primary"})}}
-<hr>
+      <hr />
       <!-- Filter Inputs -->
       <div class="mb-3">
-        <input type="text" id="filterCoverTag" placeholder="Filter by Cover Tag..">
-        <input type="text" id="filterAssetTag" placeholder="Filter by Asset Tag..">
-        <input type="text" id="filterSerialNumber" placeholder="Filter by Serial Number..">
-        <input type="text" id="filterLocation" placeholder="Filter by Location..">
+        <input
+          type="text"
+          id="filterCoverTag"
+          placeholder="Filter by Cover Tag.."
+        />
+        <input
+          type="text"
+          id="filterAssetTag"
+          placeholder="Filter by Asset Tag.."
+        />
+        <input
+          type="text"
+          id="filterSerialNumber"
+          placeholder="Filter by Serial Number.."
+        />
+        <input
+          type="text"
+          id="filterLocation"
+          placeholder="Filter by Location.."
+        />
         <button class="btn btn-primary" onclick="applyFilters()">Search</button>
       </div>
 
@@ -52,13 +62,14 @@ Scanned Assets
           {% for asset in all_assets %}
           <tr>
             {% if asset.cover_tag != None %}
+
             <td>{{ asset.cover_tag }}</td>
             <td>{{ asset.asset_id }}</td>
             <td>{{ asset.serial_number }}</td>
             <td>{{ asset.location }}</td>
+            <td><a href="{{url_for('edit', asset_id=asset.id)}}">Edit</a></td>
           </tr>
-          {% endif %}
-          {% endfor %}
+          {% endif %} {% endfor %}
         </tbody>
       </table>
     </div>
@@ -68,10 +79,18 @@ Scanned Assets
 <!-- JavaScript for Table Filtering -->
 <script>
   function applyFilters() {
-    var filterCoverTag = document.getElementById("filterCoverTag").value.toUpperCase();
-    var filterAssetTag = document.getElementById("filterAssetTag").value.toUpperCase();
-    var filterSerialNumber = document.getElementById("filterSerialNumber").value.toUpperCase();
-    var filterLocation = document.getElementById("filterLocation").value.toUpperCase();
+    var filterCoverTag = document
+      .getElementById("filterCoverTag")
+      .value.toUpperCase();
+    var filterAssetTag = document
+      .getElementById("filterAssetTag")
+      .value.toUpperCase();
+    var filterSerialNumber = document
+      .getElementById("filterSerialNumber")
+      .value.toUpperCase();
+    var filterLocation = document
+      .getElementById("filterLocation")
+      .value.toUpperCase();
 
     var table = document.getElementById("tableBody");
     var rows = table.getElementsByTagName("tr");
@@ -92,7 +111,10 @@ Scanned Assets
         if (filterAssetTag && cellAssetTag.indexOf(filterAssetTag) === -1) {
           showRow = false;
         }
-        if (filterSerialNumber && cellSerialNumber.indexOf(filterSerialNumber) === -1) {
+        if (
+          filterSerialNumber &&
+          cellSerialNumber.indexOf(filterSerialNumber) === -1
+        ) {
           showRow = false;
         }
         if (filterLocation && cellLocation.indexOf(filterLocation) === -1) {
