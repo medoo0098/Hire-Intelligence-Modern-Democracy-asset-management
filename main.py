@@ -14,8 +14,8 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from forms import RegisterForm, LoginForm, ScanForm, AssignForm, RenameUpdateForm, AddForm, SearchForm, ShowDB, \
-    ReturnedForm
+from forms import (RegisterForm, LoginForm, ScanForm, AssignForm, RenameUpdateForm, AddForm, SearchForm, ShowDB,
+                   ReturnedForm)
 import pandas as pd
 import os
 
@@ -77,7 +77,7 @@ class User(UserMixin, db.Model):
 with app.app_context():
     db.create_all()
 
-
+asset_list = []
 # Register new users into the User database
 @app.route('/register', methods=["GET", "POST"])
 def register():
@@ -150,6 +150,8 @@ def logout():
 # landing page / home page
 @app.route('/', methods=["GET", "POST"])
 def get_all_assets():
+    global asset_list
+    asset_list = []
     form = ShowDB()
     result = db.session.execute(db.select(ModDem))
     assets = result.scalars().all()
@@ -191,37 +193,52 @@ def add_new_asset():
 # Route to assign the assets to location.
 @app.route("/assign_asset", methods=["GET", "POST"])
 def assign_asset():
+    print(asset_list)
     form = AssignForm()
-    if form.validate_on_submit():
-        # an empty list for email and identifier to be converted to Miradore
-        # template for upload to users list of devices.
-        data = {
-            "Email": [],
-            "Identifier": []
-        }
-        # for all the device ranges , assign the cover number to a user
-        # takes cover tag, with that info, takes serial number and created a csv file for that location
-        # for i in range(int(form.start_number.data), int(form.end_number.data) + 1):
-        while True:
-            i = form.cover_tag.data
-            if i == "finish":
-                break
-            result = db.session.execute(db.select(ModDem).where(ModDem.cover_tag == i))
-            asset = result.scalar()
-            asset.location = form.location.data
-            db.session.commit()
-            serial_number = asset.serial_number
-            data["Email"].append(form.location.data)
-            data["Identifier"].append(serial_number)
-        df = pd.DataFrame(data)
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        # Specify the relative path to your files directory
-        folder_path = os.path.join(base_dir, 'locations')
-        # Access the form field correctly: form.location.data
-        filename = f"{form.location.data}.csv"
-        path = os.path.join(folder_path, filename)
-        df.to_csv(path, index=False)
-        return redirect(url_for("assign_asset"))
+    cover_form = ReturnedForm()
+    if request.method == "POST" and "custom_action" in request.form:
+        print("yup")
+    if cover_form.validate_on_submit():
+        asset_list.append(cover_form.cover_tag.data)
+        print(asset_list)
+    else:
+        if request.method == "POST" and "custom_action" in request.form:
+            print("yup")
+        if form.validate_on_submit():
+            # an empty list for email and identifier to be converted to Miradore
+            # template for upload to users list of devices.
+            data = {
+                "Email": [],
+                "Identifier": []
+            }
+            # for all the device ranges , assign the cover number to a user
+            # takes cover tag, with that info, takes serial number and created a csv file for that location
+
+            for i in asset_list.copy():
+
+                result = db.session.execute(db.select(ModDem).where(ModDem.cover_tag == i))
+                asset = result.scalar()
+                asset.location = form.location.data
+                db.session.commit()
+                serial_number = asset.serial_number
+                data["Email"].append(form.location.data)
+                data["Identifier"].append(serial_number)
+                print(data)
+                print(asset_list)
+                asset_list.remove(i)
+                print(asset_list)
+            df = pd.DataFrame(data)
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            # Specify the relative path to your files directory
+            folder_path = os.path.join(base_dir, 'locations')
+            # Access the form field correctly: form.location.data
+            filename = f"{form.location.data}.csv"
+            path = os.path.join(folder_path, filename)
+            df.to_csv(path, index=False)
+            return redirect(url_for("assign_asset"))
+
+    if request.method == "POST" and "custom_action" in request.form:
+        print("yup")
 
         # Get the current working directory of your Flask app
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -232,7 +249,8 @@ def assign_asset():
     # Get a list of all files in the folder
     files = os.listdir(folder_path)
 
-    return render_template("assign_asset.html", form=form, current_user=current_user, files=files)
+    return render_template("assign_asset.html", cover_form=cover_form, form=form,
+                           current_user=current_user, files=files)
 
 
 # to manually add a device to the database
@@ -328,7 +346,7 @@ def rename_export():
         else:
             flash('No file selected!', 'error')
 
-        df = pd.read_csv("Device Information.csv")
+        df = pd.read_csv(file_path2)
         print(df.head())
         for index, row in df.iterrows():
             result = db.session.execute(db.select(ModDem).where(ModDem.serial_number == row["Serial Number"]))
