@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, IntegerField, FileField
+from wtforms import StringField, SubmitField, PasswordField, IntegerField, FileField, HiddenField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.validators import DataRequired
 
@@ -54,10 +54,12 @@ class SearchForm(FlaskForm):
 
 class ShowDB(FlaskForm):
     submit = SubmitField("Show DB")
+    form_type = HiddenField(default="db")
 
 
 class ExportForm(FlaskForm):
     submit = SubmitField("Export To CSV")
+    form_type = HiddenField(default="export")
 
 
 class ReturnedForm(FlaskForm):

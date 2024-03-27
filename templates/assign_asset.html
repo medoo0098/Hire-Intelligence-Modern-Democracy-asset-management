@@ -67,20 +67,20 @@ include "header.html" %}
   </div>
 </main>
 
-<!-- JavaScript to focus on the first form field and clear its content -->
 <script>
   // Focus on the cover_tag input field after form submission
-  document.addEventListener("DOMContentLoaded", function () {
-    const coverTagInput = document.querySelector("#cover_tag");
-    coverTagInput.focus(); // Focus on the cover_tag input field
-
+  document.addEventListener("DOMContentLoaded", function() {
     const form = document.querySelector("form");
-    form.addEventListener("submit", function (event) {
-      event.preventDefault(); // Prevent the form from submitting
+    const coverTagInput = form.querySelector("#cover_tag");
 
-      // Focus on the cover_tag input field after form submission
-      coverTagInput.focus();
+    form.addEventListener("submit", function(event) {
+      event.stopPropagation();
     });
+
+    if (coverTagInput) {
+      coverTagInput.value='';
+      coverTagInput.focus();
+    }
   });
 </script>
 

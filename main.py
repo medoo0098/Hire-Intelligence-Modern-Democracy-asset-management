@@ -156,11 +156,8 @@ def get_all_assets():
     export_form = ExportForm()
     result = db.session.execute(db.select(ModDem))
     assets = result.scalars().all()
-    if form.validate_on_submit():
-        print("form")
-        return redirect(url_for("show_db"))
-    if export_form.validate_on_submit():
-        print("export_form")
+    if export_form.validate_on_submit() and export_form.form_type.data == "export":
+        print("export")
         all_records = ModDem.query.all()
 
         # Convert the queried records into a pandas DataFrame
@@ -192,10 +189,14 @@ def get_all_assets():
         csv_filename = "ModDem_records.csv"
         csv_path = os.path.join(os.path.dirname(__file__), csv_filename)
         df.to_csv(csv_path, index=False)
+        return redirect(url_for("get_all_assets"))
+    if form.validate_on_submit() and form.form_type.data == "db":
+        print("form")
+        print(form.form_type.data)
+        return redirect(url_for("show_db"))
 
-        return redirect(url_for("/"))
     return render_template("index.html", all_assets=assets, current_user=current_user, form=form,
-                           export_form=export_form)
+                           export_form=export_form, form_type="export", db_form_type="db")
 
 
 # scanning devices to add cover tag to database acording to asset ID
