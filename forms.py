@@ -56,6 +56,10 @@ class ShowDB(FlaskForm):
     submit = SubmitField("Show DB")
 
 
+class ExportForm(FlaskForm):
+    submit = SubmitField("Export To CSV")
+
+
 class ReturnedForm(FlaskForm):
     cover_tag = StringField("Scan Cover Tags",validators=[DataRequired()])
     submit = SubmitField("Save")

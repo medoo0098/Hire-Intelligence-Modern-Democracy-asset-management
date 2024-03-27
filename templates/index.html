@@ -3,7 +3,7 @@
 <!-- Page Header-->
 <header
   class="masthead"
-  style="background-image: url('../static/assets/img/MD.png')"
+  style="background-image: url('../static/assets/img/MD.png'); background-size: cover;"
 >
   <div class="container position-relative px-4 px-lg-5">
     <div class="row gx-4 gx-lg-5 justify-content-center">
@@ -22,6 +22,8 @@
     <div class="col-md-10 col-lg-8 col-xl-7">
       <h2 class="mb-4">All Scanned Assets</h2>
       {{render_form(form, novalidate=True, button_map={"submit": "primary"})}}
+      <hr />
+      {{render_form(export_form, novalidate=True)}}
       <hr />
       <!-- Filter Inputs -->
       <div class="mb-3">

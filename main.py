@@ -15,7 +15,7 @@ from sqlalchemy import Integer, String
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from forms import (RegisterForm, LoginForm, ScanForm, AssignForm, RenameUpdateForm, AddForm, SearchForm, ShowDB,
-                   ReturnedForm)
+                   ReturnedForm, ExportForm)
 import pandas as pd
 import os
 
@@ -153,11 +153,49 @@ def get_all_assets():
     global asset_list
     asset_list = []
     form = ShowDB()
+    export_form = ExportForm()
     result = db.session.execute(db.select(ModDem))
     assets = result.scalars().all()
     if form.validate_on_submit():
+        print("form")
         return redirect(url_for("show_db"))
-    return render_template("index.html", all_assets=assets, current_user=current_user, form=form)
+    if export_form.validate_on_submit():
+        print("export_form")
+        all_records = ModDem.query.all()
+
+        # Convert the queried records into a pandas DataFrame
+        data = {
+            "Serial Number": [],
+            "UDID": [],
+            "Asset ID": [],
+            "Cover Tag": [],
+            "Location": [],
+            "Technician": [],
+            "Time Scanned": [],
+            "Owner": [],
+            "Returned": []
+        }
+        for record in all_records:
+            data["Serial Number"].append(record.serial_number)
+            data["UDID"].append(record.udid)
+            data["Asset ID"].append(record.asset_id)
+            data["Cover Tag"].append(record.cover_tag)
+            data["Location"].append(record.location)
+            data["Technician"].append(record.technician)
+            data["Time Scanned"].append(record.time_scanned)
+            data["Owner"].append(record.owner)
+            data["Returned"].append(record.returned)
+
+        df = pd.DataFrame(data)
+
+        # Export the DataFrame to a CSV file
+        csv_filename = "ModDem_records.csv"
+        csv_path = os.path.join(os.path.dirname(__file__), csv_filename)
+        df.to_csv(csv_path, index=False)
+
+        return redirect(url_for("/"))
+    return render_template("index.html", all_assets=assets, current_user=current_user, form=form,
+                           export_form=export_form)
 
 
 # scanning devices to add cover tag to database acording to asset ID
