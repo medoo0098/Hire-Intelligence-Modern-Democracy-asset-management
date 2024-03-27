@@ -1,6 +1,5 @@
-{% from "bootstrap5/form.html" import render_form %}
-{% block content %}
-{% include "header.html" %}
+{% from "bootstrap5/form.html" import render_form %} {% block content %} {%
+include "header.html" %}
 
 <!-- Page Header -->
 <header
@@ -21,32 +20,39 @@
   </div>
 </header>
 
-
-<hr>
-<br>
+<hr />
+<br />
 
 <main class="mb-4">
   <div class="container">
     <div class="row">
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-      {% for message in messages %}
+      {% with messages = get_flashed_messages() %} {% if messages %} {% for
+      message in messages %}
       <p class="flash">{{ message }}</p>
-      {% endfor %}
-      {% endif %}
-      {% endwith %}
+      {% endfor %} {% endif %} {% endwith %}
+
+      <!-- fist form to capture asset tags-->
       <div class="col-lg-8 col-md-10 mx-auto">
-        {{ render_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+        {{ render_form(cover_form, novalidate=True, button_map={"submit":
+        "primary"}) }}
+      </div>
+      <br />
+      <br />
+      <br />
+      <hr />
+      <div class="col-lg-8 col-md-10 mx-auto">
+        {{ render_form(form, novalidate=True, button_map={"submit": "primary"})
+        }}
       </div>
     </div>
   </div>
 
-   <br>
-  <br>
-  <hr>
-  <br>
-  <br>
-<!-- List of downloadable files -->
+  <br />
+  <br />
+  <hr />
+  <br />
+  <br />
+  <!-- List of downloadable files -->
   <div class="row mt-4">
     <div class="col-lg-8 col-md-10 mx-auto">
       <h2>Downloadable Files</h2>
@@ -59,6 +65,23 @@
       </ul>
     </div>
   </div>
+</main>
 
+<!-- JavaScript to focus on the first form field and clear its content -->
+<script>
+  // Focus on the cover_tag input field after form submission
+  document.addEventListener("DOMContentLoaded", function () {
+    const coverTagInput = document.querySelector("#cover_tag");
+    coverTagInput.focus(); // Focus on the cover_tag input field
 
-</main>{% endblock %}
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function (event) {
+      event.preventDefault(); // Prevent the form from submitting
+
+      // Focus on the cover_tag input field after form submission
+      coverTagInput.focus();
+    });
+  });
+</script>
+
+{% endblock %}
